@@ -2,37 +2,31 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-@app.route("/")
-def home():
-    return "Calculator App is Running 🚀"
+@app.route("/calculate", methods=["POST"])
+def calculate():
+    data = request.get_json()
+    num1 = float(data.get("num1", 0))
+    num2 = float(data.get("num2", 0))
+    operator = data.get("operator")
 
-# Example calculator API
-@app.route("/add", methods=["GET"])
-def add():
-    a = int(request.args.get("a", 0))
-    b = int(request.args.get("b", 0))
-    return jsonify({"result": a + b})
+    try:
+        if operator == "+":
+            result = num1 + num2
+        elif operator == "-":
+            result = num1 - num2
+        elif operator == "*":
+            result = num1 * num2
+        elif operator == "/":
+            if num2 == 0:
+                return jsonify({"error": "Division by zero not allowed"}), 400
+            result = num1 / num2
+        else:
+            return jsonify({"error": "Invalid operator"}), 400
 
-@app.route("/sub", methods=["GET"])
-def sub():
-    a = int(request.args.get("a", 0))
-    b = int(request.args.get("b", 0))
-    return jsonify({"result": a - b})
+        return jsonify({"result": result})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-@app.route("/mul", methods=["GET"])
-def mul():
-    a = int(request.args.get("a", 1))
-    b = int(request.args.get("b", 1))
-    return jsonify({"result": a * b})
-
-@app.route("/div", methods=["GET"])
-def div():
-    a = int(request.args.get("a", 1))
-    b = int(request.args.get("b", 1))
-    if b == 0:
-        return jsonify({"error": "Division by zero not allowed"})
-    return jsonify({"result": a / b})
 
 if __name__ == "__main__":
     app.run(debug=True)
-
